@@ -50,7 +50,7 @@ with open('tle.txt', "r") as TLE:
     for line2 in TLE:
         line3 = TLE.readline()
         day = float(line2.split()[3][2:])
-        if day >= 60 and day < 91:
+        if day >= 60 and day <= 91:
             second = int((day - int(day)) * 24 * 60 * 60)
             iss = ephem.readtle(line1, line2, line3)
             iss.compute(f'2009/3/{int(day)}')
@@ -89,7 +89,43 @@ zline = []
 for key, val in df.items():
     xline.append(int(val.long[:val.long.find(':')]))
     yline.append(int(val.lat[:val.lat.find(':')]))
-    zline.append(val.count_speed1_down)
+    zline.append(val.count_speed1_down + val.count_speed1_up + val.count_speed2_down + val.count_speed2_up)
 
 ax.scatter3D(xline, yline, zline, 'gray')
 plt.show()
+
+with open("actual_tle.txt", "w") as actual_tle:
+    print(lst_sat[0][1], lst_sat[0][2], file=actual_tle, sep='\n')  # this tle is fine
+    for i in range(1, len(lst_sat) - 1):
+        cur_sat = lst_sat[i][0]
+        prev_sat = lst_sat[i - 1][0]
+        next_sat = lst_sat[i + 1][0]
+
+        cur_time = get_time(cur_sat)
+
+        geocentric1 = prev_sat.at(cur_time)
+        geocentric2 = cur_sat.at(cur_time)
+        geocentric3 = next_sat.at(cur_time)
+
+        r1 = np.array(geocentric1.position.km)
+        r2 = np.array(geocentric2.position.km)
+        r3 = np.array(geocentric3.position.km)
+        dR12 = np.sum((r1 - r2) ** 2) ** 0.5
+        dR32 = np.sum((r1 - r2) ** 2) ** 0.5
+        print(dR12, dR32)
+        error_value = 1000
+        if dR12 < error_value and dR32 < error_value:
+            # tle is fine
+            print(lst_sat[i][1], lst_sat[i][2], file=actual_tle, sep='\n')
+        else:
+            """
+            2009-Mar-02 15:49:41.7772 UTC
+            2009-Mar-03 03:04:31.6062 UTC
+            2009-Mar-10 15:15:40.5988 UTC
+            2009-Mar-10 15:21:35.5067 UTC
+
+            Bad tle!
+            """
+            cnt_bad += 1
+    print(lst_sat[-1][1], lst_sat[-1][2], file=actual_tle, sep='\n')  # this tle is fine
+# print(cnt_bad)
