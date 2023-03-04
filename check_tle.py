@@ -14,7 +14,7 @@ def get_time(sat):
     cur_time = list(map(float, cur_date[2].split(':')))
     cur_day = cur_date[1].split('-')
     res_arr = [int(cur_day[0]), 3, int(cur_day[2]), cur_time[0], cur_time[1], cur_time[2]]
-
+    #                           ^ - month number
     return ts.utc(*res_arr)
 
 
