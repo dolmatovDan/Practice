@@ -1,95 +1,109 @@
 import ephem
-import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
-
-class Item:
-    def __init__(self, long: str, lat: str, day: int, count_speed1_up: int = 0, count_speed1_down: int = 0,
-                 count_speed2_up: int = 0, count_speed2_down: int = 0):
-        self.long = long
-        self.lat = lat
-        self.day = day
-        self.count_speed1_up = count_speed1_up
-        self.count_speed1_up = count_speed1_down
-        self.count_speed2_up = count_speed2_up
-        self.count_speed2_up = count_speed2_down
-
-    def print_values(self):
-        print(f"long: {self.long}")
-        print(f"lat: {self.lat}")
-        print(f"day: {self.day}")
-        print(f"count_speed1_up: {self.count_speed1_up}")
-        print(f"count_speed1_down: {self.count_speed1_down}")
-        print(f"count_speed2_up: {self.count_speed2_up}")
-        print(f"count_speed2_down: {self.count_speed2_down}")
-
-def get_count_speed(file_name: str, second: int) -> int:
-    result = 0
-    with open(file_name, "r") as data:
-        content = data.readlines()
-        start = float(content[0].split()[0])
-        end = float(content[-1].split()[0]) - start
-        # if end < second:
-        #     print("ERROR", start, end, second, file_name) # ther're some erros!!!!!!!
-        left = -1
-        right = len(content) - 1
-        while right > left + 1:
-            mid = (left + right) // 2
-            if float(content[mid].split()[0]) - start >= second:
-                right = mid
-            else:
-                left = mid
-        pos = right
-        energy_window = list(map(int, content[pos].split()[2:]))
-        result = sum(energy_window)
-    return result
-
-df = dict()
-with open('tle.txt', "r") as TLE:
-    line1 = "ISS (ZARYA)"
-    cnt = 0
-    for line2 in TLE:
-        line3 = TLE.readline()
-        day = float(line2.split()[3][2:])
-        if day >= 60 and day <= 91:
-            second = int((day - int(day)) * 24 * 60 * 60)
-            iss = ephem.readtle(line1, line2, line3)
-            iss.compute(f'2009/3/{int(day)}')
-            cords = ('%s %s' % (iss.sublong, iss.sublat)).split()
-            df[second] = Item(cords[0], cords[1], int(day) - 59)
-
-for second, it in df.items():
-    cur_day = str(it.day)
-    if len(cur_day) == 1:
-        cur_day = '0' + cur_day
-    name1_up = f'data\\krf200903{cur_day}_1_S1_bg.thr'
-    name1_down = f'data\\krf200903{cur_day}_1_S2_bg.thr'
-
-    name2_up = f'data\\krf200903{cur_day}_2_S1_bg.thr'
-    name2_down = f'data\\krf200903{cur_day}_2_S2_bg.thr'
-
-    it.count_speed1_up = get_count_speed(name1_up, second)
-    it.count_speed1_down = get_count_speed(name1_down, second)
-
-    it.count_speed2_up = get_count_speed(name2_up, second)
-    it.count_speed2_down = get_count_speed(name2_down, second)
+import sys
+import numpy as np
+from skyfield.api import load, EarthSatellite
 
 
-# debug
-# cnt = 0
-# for key, val in df.items():
-#     print(f"key: {key}")
-#     val.print_values()
-#     print("________________")
+def read_tle(file_name):
+    with open(file_name) as f:
+        return f.read()
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-xline = []
-yline = []
-zline = []
-for key, val in df.items():
-    xline.append(int(val.long[:val.long.find(':')]))
-    yline.append(int(val.lat[:val.lat.find(':')]))
-    zline.append(val.count_speed1_down + val.count_speed1_up + val.count_speed2_down + val.count_speed2_up)
 
-ax.scatter3D(xline, yline, zline, 'gray')
-plt.show()
+def get_time(sat):
+    ts = load.timescale()
+    cur_date = sat.epoch.utc_jpl().split()
+    # print(cur_date)
+
+    cur_time = list(map(float, cur_date[2].split(':')))
+    cur_day = cur_date[1].split('-')
+    res_arr = [int(cur_day[0]), 3, int(cur_day[2]), cur_time[0], cur_time[1], cur_time[2]]
+    #                           ^ - month number
+
+    return ts.utc(*res_arr)
+
+
+def get_sat(file_name):
+    str_tle = read_tle(file_name)
+    lst_lines = [s.strip() for s in str_tle.split('\n') if len(s.strip()) > 0]
+
+    lst_tle = [(l1, l2) for l1, l2 in zip(lst_lines[:-1:2], lst_lines[1::2])]
+
+    lst_sat = []
+    for tle in lst_tle:
+        lst_sat.append(EarthSatellite(tle[0], tle[1], 'KORONAS-FOTON'))
+
+    return lst_sat
+
+
+def get_count_speed_in_day(file_name, sat, day):
+    res = []
+    with open(file_name, 'r') as data:
+        prev_second = -2e15  # -INF
+        for line in data:
+            cur_second = float(line.split()[0])
+            if cur_second - prev_second >= 10:
+                cur_day = day
+                cnt_second = 0
+                ts = load.timescale()
+
+                if cur_second < 0:
+                    cur_day -= 1
+                    cnt_second = 24 * 60 * 60 + cur_second
+                else:
+                    cnt_second = cur_second
+
+                date = cur_day + cur_second / (24 * 60 * 60)
+                time = ts.utc(2009, 3, date)
+                # print(time.utc_strftime(), day, cur_second)
+
+                geoposition = sat.at(time)
+
+                cur_long = geoposition.subpoint().longitude.radians * 180 / np.pi
+                cur_lat = geoposition.subpoint().latitude.radians * 180 / np.pi
+
+                cur_count_speed = sum(list(map(float, line.split())))
+
+                res.append([cur_long, cur_lat, cur_count_speed])
+
+                prev_second = cur_second
+    return res
+
+
+def main():
+    with open('actual_tle.txt', 'r') as actual_tle, \
+            open('plot_data/plot_data_1_S1.txt', 'w') as plot_data_1_S1, \
+            open('plot_data/plot_data_1_S2.txt', 'w') as plot_data_1_S2, \
+            open('plot_data/plot_data_2_S1.txt', 'w') as plot_data_2_S1, \
+            open('plot_data/plot_data_2_S2.txt', 'w') as plot_data_2_S2:
+
+        lst_sat = get_sat('actual_tle.txt')
+        prev_day = -1
+        for sat in lst_sat:
+            cur_day = int(get_time(sat).utc_jpl().split()[1].split('-')[-1])
+            if cur_day == prev_day:
+                continue
+            str_day = str(cur_day)
+            if len(str_day) == 1:
+                str_day = '0' + str_day
+
+            res = get_count_speed_in_day(f'./data/krf200903{str_day}_1_S1_bg.thr', sat, cur_day)
+            for data in res:
+                print(' '.join(map(str, data)), file=plot_data_1_S1)
+
+            res = get_count_speed_in_day(f'./data/krf200903{str_day}_1_S2_bg.thr', sat, cur_day)
+            for data in res:
+                print(' '.join(map(str, data)), file=plot_data_1_S2)
+
+            res = get_count_speed_in_day(f'./data/krf200903{str_day}_2_S1_bg.thr', sat, cur_day)
+            for data in res:
+                print(' '.join(map(str, data)), file=plot_data_2_S1)
+
+            res = get_count_speed_in_day(f'./data/krf200903{str_day}_2_S2_bg.thr', sat, cur_day)
+            for data in res:
+                print(' '.join(map(str, data)), file=plot_data_2_S2)
+
+            prev_day = cur_day
+            print('ok', cur_day)
+
+
+main()
