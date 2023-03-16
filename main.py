@@ -37,6 +37,7 @@ def get_sat(file_name):
 
 def get_count_speed_in_day(file_name, sat, day):
     res = []
+    ts = load.timescale()
     with open(file_name, 'r') as data:
         prev_second = -2e15  # -INF
         for line in data:
@@ -44,7 +45,6 @@ def get_count_speed_in_day(file_name, sat, day):
             if cur_second - prev_second >= 10:
                 cur_day = day
                 cnt_second = 0
-                ts = load.timescale()
 
                 if cur_second < 0:
                     cur_day -= 1
