@@ -35,7 +35,7 @@ def get_sat(file_name):
     return lst_sat
 
 
-def get_count_speed_in_day(file_name, sat, day):
+def get_count_rate_in_day(file_name, sat, day):
     res = []
     ts = load.timescale()
     with open(file_name, 'r') as data:
@@ -61,9 +61,9 @@ def get_count_speed_in_day(file_name, sat, day):
                 cur_long = geoposition.subpoint().longitude.radians * 180 / np.pi
                 cur_lat = geoposition.subpoint().latitude.radians * 180 / np.pi
 
-                cur_count_speed = sum(list(map(float, line.split())))
+                cur_count_rate = sum(list(map(float, line.split())))
 
-                res.append([cur_long, cur_lat, cur_count_speed])
+                res.append([cur_long, cur_lat, cur_count_rate])
 
                 prev_second = cur_second
     return res
@@ -86,19 +86,19 @@ def main():
             if len(str_day) == 1:
                 str_day = '0' + str_day
 
-            res = get_count_speed_in_day(f'./data/krf200903{str_day}_1_S1_bg.thr', sat, cur_day)
+            res = get_count_rate_in_day(f'task_data/krf200903{str_day}_1_S1_bg.thr', sat, cur_day)
             for data in res:
                 print(' '.join(map(str, data)), file=plot_data_1_S1)
 
-            res = get_count_speed_in_day(f'./data/krf200903{str_day}_1_S2_bg.thr', sat, cur_day)
+            res = get_count_rate_in_day(f'task_data/krf200903{str_day}_1_S2_bg.thr', sat, cur_day)
             for data in res:
                 print(' '.join(map(str, data)), file=plot_data_1_S2)
 
-            res = get_count_speed_in_day(f'./data/krf200903{str_day}_2_S1_bg.thr', sat, cur_day)
+            res = get_count_rate_in_day(f'task_data/krf200903{str_day}_2_S1_bg.thr', sat, cur_day)
             for data in res:
                 print(' '.join(map(str, data)), file=plot_data_2_S1)
 
-            res = get_count_speed_in_day(f'./data/krf200903{str_day}_2_S2_bg.thr', sat, cur_day)
+            res = get_count_rate_in_day(f'task_data/krf200903{str_day}_2_S2_bg.thr', sat, cur_day)
             for data in res:
                 print(' '.join(map(str, data)), file=plot_data_2_S2)
 
