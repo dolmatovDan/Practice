@@ -85,7 +85,7 @@ def split_day_count_rate(day_count_rate, date):
     create_directory(dir_name)
 
     for index, orbit in enumerate(lst_orbit):
-        file_name = os.path.join(f'{dir_name}', f'{date}_{index:02d}')
+        file_name = os.path.join(f'{dir_name}', f'{date}_{index:02d}.txt')
         with open(file_name, 'w') as save_data:
             print('Time range: [ {start}  {end} ]'.format(start=sod_to_hhmmss(orbit[0][0]),
                                                           end=sod_to_hhmmss(orbit[-1][0])), file=save_data)
