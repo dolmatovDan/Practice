@@ -1,7 +1,6 @@
 import sys
 from main_ds import TLE
-from skyfield.api import load, utc, EarthSatellite
-import numpy as np
+from skyfield.api import load
 import os
 
 
@@ -34,6 +33,7 @@ def create_directory(name):
         path = './' + name
         os.mkdir(path)
 
+
 def get_day_count_rate(day, save_data, tle_file):
     cur_tle = TLE(tle_file)
     ts = load.timescale()
@@ -43,6 +43,9 @@ def get_day_count_rate(day, save_data, tle_file):
         for line in rate_data:
             cur_data = list(map(float, line.split()))
             cur_second = cur_data[0]
+            cur_count_rate_25_100 = sum(cur_data[5:8])
+            cur_count_rate_100_400 = sum(cur_data[8:11])
+            cur_count_rate_400_640 = sum(cur_data[11:-2])
             cur_count_rate = sum(cur_data[5:-2])
             if cur_second < 0:
                 continue
@@ -51,8 +54,11 @@ def get_day_count_rate(day, save_data, tle_file):
             time_ts = ts.utc(2009, 3, day, *cur_hhmmss)
 
             cur_long, cur_lat, days_from_epoch = cur_tle.get_geo_pos(time_ts)
-            print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
-                cur_second, cur_count_rate, cur_lat, cur_long), file=data)
+            print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+                cur_second, cur_count_rate_25_100, cur_count_rate_100_400, cur_count_rate_400_640, cur_lat, cur_long), file=data)
+            
+            # print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+            #     cur_second, cur_count_rate, cur_lat, cur_long), file=data)
 
 
 def split_day_count_rate(day_count_rate, date):
@@ -64,22 +70,22 @@ def split_day_count_rate(day_count_rate, date):
     lst_orbit = [[]]
 
     for line in lst_count_rate:
-        cur_lat = line[2]
+        cur_lat = line[-2]
 
         if len(lst_orbit[-1]) <= 1:
             lst_orbit[-1].append(line)
         else:
-            if (lst_orbit[-1][-1][2] - lst_orbit[-1][-2][2]) * (cur_lat - lst_orbit[-1][-1][2]) > 0 or \
+            if (lst_orbit[-1][-1][-2] - lst_orbit[-1][-2][-2]) * (cur_lat - lst_orbit[-1][-1][-2]) > 0 or \
                     len(lst_orbit[-1]) <= 5:  # need this condition, because otherwise several points are lost
                 # 3 - max count of zero derivative in a row (5 > 3)
                 lst_orbit[-1].append(line)
             else:
                 lst_orbit.append([line])
 
-    # for i in range(len(orbit)):
-    #     print(len(orbit[i]))
-    # print(len(orbit))
-    # print(sum([len(x) for x in orbit]))
+    # for i in range(len(lst_orbit)):
+    #     print(len(lst_orbit[i]))
+    # print(len(lst_orbit))
+    # print(sum([len(x) for x in lst_orbit]))
 
     dir_name = f'orbit_{date}'
     create_directory(dir_name)
@@ -97,12 +103,7 @@ def split_day_count_rate(day_count_rate, date):
                                                                end=max(orbit[0][3], orbit[-1][3])), file=save_data)
 
             for line in orbit:
-                cur_second = line[0]
-                cur_count_rate = line[1]
-                cur_lat = line[2]
-                cur_long = line[3]
-                print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(cur_second, cur_count_rate, cur_lat, cur_long),
-                      file=save_data)
+                print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(*line), file=save_data)
 
 
 def main():
