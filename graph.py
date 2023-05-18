@@ -1,60 +1,91 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import bisect
-import os
 
 
-def read_text_file(file_name):
-    with open(file_name) as f:
-        return f.read()
+def get_lat_ticks(times, pair_time_lat):
+    tick_labels = []
+    for time in times:
+        pos = pair_time_lat[1][bisect.bisect_left(pair_time_lat[0], time)]
+        tick_labels.append(str(pos))
+    return tick_labels
 
 
-def parse_data(file_name):
-    str_data = read_text_file(file_name)
-    lst_data = [s.split() for s in str_data.split('\n') if len(s.split()) > 0]
+def read(name):
+    with open(f"orbit_20090312/{name}") as file:
+        time = []
+        lat = []
+        count_rate = []
+        pair_time_lat = [[], []]
 
-    time_range = lst_data[0]
-    time_range_duration = lst_data[1]
-    long_range = lst_data[2]
+        str_time_range = file.readline()
+        str_time_duration = file.readline()
+        str_long_range = file.readline()
 
-    lst_lat = []
-    lst_time = []
-    lst_count_rate = []
-    
-    for i in range(3, len(lst_data)):
-        cur_data = lst_data[i]
-        cur_count_rate = list(map(float, cur_data[1:-2]))
-        cur_second = float(cur_data[0])
-        cur_lat = float(cur_data[-2])
+        for line in file:
+            point = list(map(float, line.split()))
+            time.append(point[0])
+            lat.append(round(point[2], 2))
+            count_rate.append(point[1])
+            pair_time_lat[0].append(point[0])
+            pair_time_lat[1].append(point[2])
 
-        lst_lat.append(cur_lat)
-        lst_time.append(cur_second)
-        lst_count_rate.append(cur_count_rate)
-    
-    return [time_range, time_range_duration, long_range, lst_time, lst_lat, [sum(a) for a in lst_count_rate]]
-
-
-def plot_data(x1, x2, y, description):
-    fig, ax1 = plt.subplots(figsize=(16, 9))
-    ax1.plot(x1, y)
-    ax2 = ax1.secondary_xaxis('top')
-    
-    ax1.set_xlim(np.arange(min(x1), max(x1), 100))
-    ax1.set_ylim(np.arange(0, 100001, 10000))
-
-    plt.show()
-
+        return [count_rate, lat, time, pair_time_lat, str_time_range, str_time_duration, str_long_range]
 
 
 def main():
-    # day = int(input())
-    day = 12
-    dir_plot_data = './orbit_20090312/'
-    for index in range(1):
-        plot_data_name = os.path.join(dir_plot_data, f'20090312_{index:02d}.txt')
-        data = parse_data(plot_data_name)
-        plot_data(data[3], data[4], data[5], data[0:3])
+    for index in range(31):
+        data = read("20090312_{:02d}.txt".format(index))
+
+        count_rate = data[0]
+        lat = data[1]
+        time = data[2]
+        pair_time_lat = data[3]
+        title_data = f"{data[4]}{data[5]}{data[6]}"
+
+        fig, ax = plt.subplots(figsize=(24, 18))
+
+        ax1 = ax.twiny()
+
+        # plt.scatter(time, countRate, s=0.5)
+        ax.plot(time, count_rate, color='blue', linewidth=1.25)
+
+        plt.annotate(title_data, (0, 0), (0, -70), xycoords='axes fraction', textcoords='offset points', va='top', fontsize=18)
+
+        min_elem = min(time)
+        max_elem = max(time)
+
+        ticks_time = np.arange(int(min(time)), int(max(time)), 100)
+
+        ax.set_xlim([min_elem, max_elem])
+        ax.set_xticks(ticks_time)
+
+        ax1.set_xlim([min_elem, max_elem])
+        ax1.set_xticks(ticks_time)
+
+        labels = get_lat_ticks(ticks_time, pair_time_lat)
+
+        ax1.set_xticklabels(labels)
+        ax1.tick_params(rotation=45, labelsize=17)
+
+        ax.tick_params(rotation=45, labelsize=17)
+        ax.set_xlabel("Time (s)", fontsize=35)
+        ax.set_ylabel("Count Speed", fontsize=35)
+        ax.set_yticks(np.arange(0, 20000, 1000))
 
 
-if __name__ == "__main__":
+        # plt.semilogy()
+
+        ax.set_ylim([10, 20000])
+        ax.grid(which="major", color=[0.4, 0.4, 0.4])
+        ax.grid(which="minor", color=[0.7, 0.7, 0.7], linestyle='--')
+        ax.minorticks_on()
+
+        ax1.set_xlabel("Latitude", fontsize=35)
+
+        fig.savefig("plots/20090312_{:02d}.png".format(index))
+        plt.close(fig)
+
+
+if __name__ == '__main__':
     main()

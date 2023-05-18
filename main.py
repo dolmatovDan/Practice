@@ -61,9 +61,13 @@ def get_count_rate_in_day(file_name, sat, day):
                 cur_long = geoposition.subpoint().longitude.radians * 180 / np.pi
                 cur_lat = geoposition.subpoint().latitude.radians * 180 / np.pi
 
-                cur_count_rate = sum(list(map(float, line.split()))[5:-2])
+                cur_data = list(map(float, line.split()))
+                cur_count_rate = sum(cur_data[5:-2])
+                cur_count_rate_25_100 = sum(cur_data[5:8])
+                cur_count_rate_100_400 = sum(cur_data[8:11])
+                cur_count_rate_400_640 = sum(cur_data[11:-2])
 
-                res.append([cur_count_rate, cur_lat, cur_long])
+                res.append([cur_count_rate_25_100, cur_count_rate_100_400, cur_count_rate_400_640, cur_lat, cur_long])
 
                 prev_second = cur_second
     return res
@@ -88,22 +92,22 @@ def main():
 
             res = get_count_rate_in_day(f'task_data/krf200903{str_day}_1_S1_bg.thr', sat, cur_day)
             for data in res:
-                print("{:06.3f}   {:06.3f}   {:06.3f}".format(*data), file=plot_data_1_S1)
+                print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(*data), file=plot_data_1_S1)
 
             res = get_count_rate_in_day(f'task_data/krf200903{str_day}_1_S2_bg.thr', sat, cur_day)
             for data in res:
-                print("{:06.3f}   {:06.3f}   {:06.3f}".format(*data), file=plot_data_1_S2)
+                print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(*data), file=plot_data_1_S2)
 
             res = get_count_rate_in_day(f'task_data/krf200903{str_day}_2_S1_bg.thr', sat, cur_day)
             for data in res:
-                print("{:06.3f}   {:06.3f}   {:06.3f}".format(*data), file=plot_data_2_S1)
+                print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(*data), file=plot_data_2_S1)
 
             res = get_count_rate_in_day(f'task_data/krf200903{str_day}_2_S2_bg.thr', sat, cur_day)
             for data in res:
-                print("{:06.3f}   {:06.3f}   {:06.3f}".format(*data), file=plot_data_2_S2)
+                print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(*data), file=plot_data_2_S2)
 
             prev_day = cur_day
             print('ok', cur_day)
 
-
-main()
+if __name__ == "__main__":
+    main()
