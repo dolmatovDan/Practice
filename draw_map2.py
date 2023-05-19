@@ -25,12 +25,11 @@ class Plot:
         self.scale = 0.2
         # m.etopo(scale=0.5, alfa=0) # Another way of drawing
         self.draw_map()
-        self.norm = matplotlib.colors.Normalize(vmin=0, vmax=self.const)
-        print(self.const)
+        self.norm = matplotlib.colors.Normalize(vmin=2, vmax=self.const)
         self.cmap = matplotlib.cm.coolwarm
         plt.set_cmap('coolwarm')
         self.cbar = plt.colorbar(matplotlib.cm.ScalarMappable(norm=self.norm, cmap=self.cmap), label="Скорость счета")
-        self.cbar.set_ticks([i * 1 for i in range(0, 180)])
+        self.cbar.set_ticks(np.arange(2, 5.1, 0.5))
         self.ax.set_title(self.label, fontsize=20, fontfamily='serif',
                           fontstyle='italic')
         self.draw_points()
@@ -50,19 +49,23 @@ class Plot:
         y = []
         t = []
         self.const = np.log10(100000)
-        ar = []
+        el = 200000000
         with open(self.filename) as file:
             counter = 0
             for line in file:
                 if self.start < counter < self.finish:
                     lst1 = list(map(float, line.split()))
-                    x.append(lst1[2])
-                    y.append(lst1[1])
-                    ar.append(lst1[0])
-                    t.append(plt.cm.coolwarm(np.log10(lst1[0] + 1) / self.const))
+                    cur_count_rates = lst1[0:3]
+                    cur_count_rates.sort()
+                    if cur_count_rates[1] > 0:
+                        el = min(el, np.log10(sum(cur_count_rates)))
+                        t.append(plt.cm.coolwarm((np.log10(sum(cur_count_rates)) - 2) / self.const))
+                        x.append(lst1[-1])
+                        y.append(lst1[-2])
                 counter += 1
         plt.scatter(x, y, c=t, s=1, zorder=1, alpha=0.5)
         # print(sorted(ar))
+        print(el)
     def draw_plot(self):
         plt.show()
 

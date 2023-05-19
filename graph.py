@@ -3,6 +3,8 @@ import numpy as np
 import bisect
 
 
+DATE = 20090308
+
 def get_lat_ticks(times, pair_time_lat):
     tick_labels = []
     for time in times:
@@ -12,7 +14,7 @@ def get_lat_ticks(times, pair_time_lat):
 
 
 def read(name):
-    with open(f"orbit_20090312/{name}") as file:
+    with open(f"orbits/orbit_{DATE}/{name}") as file:
         time = []
         lat = []
         count_rate = []
@@ -22,33 +24,42 @@ def read(name):
         str_time_duration = file.readline()
         str_long_range = file.readline()
 
+        points_color = []
+
         for line in file:
             point = list(map(float, line.split()))
             time.append(point[0])
-            lat.append(round(point[2], 2))
-            count_rate.append(point[1])
-            pair_time_lat[0].append(point[0])
-            pair_time_lat[1].append(point[2])
+            lat.append(round(point[-2], 2))
+            count_rate.append(sum(point[1:4]))
+            if sum(point[1:4]) > 500 and sum(point[1:4]) < 2000:
+                points_color.append('lightgreen')
+            else:
+                points_color.append('blue')
 
-        return [count_rate, lat, time, pair_time_lat, str_time_range, str_time_duration, str_long_range]
+            pair_time_lat[0].append(point[0])
+            pair_time_lat[1].append(point[-2])
+
+        return [count_rate, lat, time, pair_time_lat, str_time_range, str_time_duration, str_long_range, points_color]
 
 
 def main():
     for index in range(31):
-        data = read("20090312_{:02d}.txt".format(index))
+        data = read(f"{DATE}_{index:02d}.txt")
 
         count_rate = data[0]
         lat = data[1]
         time = data[2]
         pair_time_lat = data[3]
         title_data = f"{data[4]}{data[5]}{data[6]}"
+        points_color = data[7]
 
         fig, ax = plt.subplots(figsize=(24, 18))
 
         ax1 = ax.twiny()
 
         # plt.scatter(time, countRate, s=0.5)
-        ax.plot(time, count_rate, color='blue', linewidth=1.25)
+        # print(len(time), len(count_rate), len(points_color))
+        ax.scatter(time, count_rate, color=points_color, linewidth=1.25, s=15)
 
         plt.annotate(title_data, (0, 0), (0, -70), xycoords='axes fraction', textcoords='offset points', va='top', fontsize=18)
 
@@ -74,7 +85,7 @@ def main():
         ax.set_yticks(np.arange(0, 20000, 1000))
 
 
-        # plt.semilogy()
+        plt.semilogy()
 
         ax.set_ylim([10, 20000])
         ax.grid(which="major", color=[0.4, 0.4, 0.4])
@@ -83,7 +94,7 @@ def main():
 
         ax1.set_xlabel("Latitude", fontsize=35)
 
-        fig.savefig("plots/20090312_{:02d}.png".format(index))
+        fig.savefig(f"plots/orbit_{DATE}/{DATE}_{index:02d}.png")
         plt.close(fig)
 
 

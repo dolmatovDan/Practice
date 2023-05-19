@@ -115,11 +115,14 @@ def get_stable_file_count_rate_range(file_name):
     str_count_rate = read_text_file(file_name)
     lst_count_rate = [list(map(float, s.split())) for s in str_count_rate.split('\n')[3:] if len(s.split()) > 0]
     range_duration = len(lst_count_rate)
-    cnt_good_points = 0 # count_rate from 500 to 1500
+
+    good_lower_bound = 500
+    good_upper_bound = 2000
+    cnt_good_points = 0 # count_rate from good_lower_bound to good_upper_bound
 
     for line in lst_count_rate:
         cur_count_rate = sum(line[1:4])
-        if cur_count_rate > 500 and cur_count_rate < 1500:
+        if cur_count_rate > good_lower_bound and cur_count_rate < good_upper_bound:
             cnt_good_points += 1
     return cnt_good_points / range_duration
 
@@ -147,16 +150,18 @@ def get_stable_day_count_rate_range(date):
 def main():
     save_data = './day_count_rate.txt'
     tle_file = './actual_tle.txt'
+    mean_stable_range = 'mean_stable_range.txt'
     lst_stable_range = []
 
-    for day in range(1, 32):
-        # get_day_count_rate(day, save_data, tle_file)
-        # split_day_count_rate(save_data, f'200903{day:02d}')
+    with open(mean_stable_range, "w") as save_data:
+        for day in range(1, 32):
+            # get_day_count_rate(day, save_data, tle_file)
+            # split_day_count_rate(save_data, f'200903{day:02d}')
 
-        cur_stable_range = get_stable_day_count_rate_range(f'200903{day:02d}')
-        lst_stable_range.append(cur_stable_range)
+            cur_stable_range = get_stable_day_count_rate_range(f'200903{day:02d}')
+            lst_stable_range.append(cur_stable_range)
+            print(f"{day:02d}   {cur_stable_range:.3f}", file=save_data)
     
-    print(lst_stable_range)
     print(sum(lst_stable_range) / len(lst_stable_range))
 
 
