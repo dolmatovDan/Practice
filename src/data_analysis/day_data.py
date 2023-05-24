@@ -92,7 +92,7 @@ def split_day_count_rate(day_count_rate, date):
     # print(sum([len(x) for x in lst_orbit]))
 
     dir_name = f'orbit_{date}'
-    dir_name = os.path.join('../orbits', dir_name)
+    dir_name = os.path.join('../data/orbits', dir_name)
     create_directory(dir_name)
 
     for index, orbit in enumerate(lst_orbit):
@@ -111,43 +111,8 @@ def split_day_count_rate(day_count_rate, date):
                 print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(*line), file=save_data)
 
 
-def get_stable_file_count_rate_range(file_name):
-    str_count_rate = read_text_file(file_name)
-    lst_count_rate = [list(map(float, s.split())) for s in str_count_rate.split('\n')[3:] if len(s.split()) > 0]
-    range_duration = len(lst_count_rate)
 
-    good_lower_bound = 500
-    good_upper_bound = 2000
-    cnt_good_points = 0 # count_rate from good_lower_bound to good_upper_bound
-
-    for line in lst_count_rate:
-        cur_count_rate = sum(line[1:4])
-        if cur_count_rate > good_lower_bound and cur_count_rate < good_upper_bound:
-            cnt_good_points += 1
-    return cnt_good_points / range_duration
-
-
-def get_stable_day_count_rate_range(date):
-    dir_name = f'orbit_{date}'
-    dir_name = os.path.join('../orbits', dir_name)
-
-    res = 0
-    cnt_files = get_directory_size(dir_name)
-
-    with open('../data/stable_range.txt', "w") as save_data:
-        for index in range(cnt_files):
-            file_name = f'{date}_{index:02d}.txt'
-            file_name = os.path.join(dir_name, file_name)
-            cur_range_duration = get_stable_file_count_rate_range(file_name)
-            res += cur_range_duration
-
-            # print(f'{index:02d}   {cur_range_duration:05.3f}', file=save_data)
-
-    res /= cnt_files
-    return res
-
-
-def month_count_rate(tle_file, save_file):
+def month_count_rate(save_file):
     dir_name = '../data/day_count_rates'
     for day in range(1, 32):
         file_name = f'count_rate_200903{day:02d}.txt'
@@ -171,11 +136,6 @@ def main():
     tle_file = '../data/tle/actual_tle.txt'
     mean_stable_range = './mean_stable_range.txt'
     month_count_rate_file = '../data/month_count_rate.txt'
-    
-    day = 1
-    
-    get_day_count_rate(day, './day_count_rate.txt', tle_file)
-    split_day_count_rate('./day_count_rate.txt', day)
 
 
 if __name__ == '__main__':
