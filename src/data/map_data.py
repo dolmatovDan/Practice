@@ -74,13 +74,13 @@ def get_count_rate_in_day(file_name, sat, day):
 
 
 def main():
-    with open('../data/tle/actual_tle.txt', 'r') as actual_tle, \
-            open('../data/plot_data/plot_data_1_S1.txt', 'w') as plot_data_1_S1, \
-            open('../data/plot_data/plot_data_1_S2.txt', 'w') as plot_data_1_S2, \
-            open('../data/plot_data/plot_data_2_S1.txt', 'w') as plot_data_2_S1, \
-            open('../data/plot_data/plot_data_2_S2.txt', 'w') as plot_data_2_S2:
+    with open('../../data/interim/actual_tle.txt', 'r') as actual_tle, \
+            open('../../data/interim/plot_data/plot_data_1_S1.txt', 'w') as plot_data_1_S1, \
+            open('../../data/interim/plot_data/plot_data_1_S2.txt', 'w') as plot_data_1_S2, \
+            open('../../data/interim/plot_data/plot_data_2_S1.txt', 'w') as plot_data_2_S1, \
+            open('../../data/interim/plot_data/plot_data_2_S2.txt', 'w') as plot_data_2_S2:
 
-        lst_sat = get_sat('../data/tle/actual_tle.txt')
+        lst_sat = get_sat('../../data/interim/actual_tle.txt')
         prev_day = -1
         for sat in lst_sat:
             cur_day = int(get_time(sat).utc_jpl().split()[1].split('-')[-1])

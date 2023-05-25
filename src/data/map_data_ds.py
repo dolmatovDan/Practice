@@ -296,10 +296,10 @@ def write_plot_data(lst_times_iso_rate, det, idx_range, path_plot_data):
 
 
 def main():
-    path_data = '../data/task_data'
+    path_data = '../../data/raw/task_data'
     path_data_aligned = './data_aligned'
-    path_plot_data = '../data/plot_data'
-    tle_file = '../data/tle/actual_tle.txt'
+    path_plot_data = '../../data/interim/plot_data'
+    tle_file = '../../data/interim/actual_tle.txt'
 
     ts = load.timescale()
 

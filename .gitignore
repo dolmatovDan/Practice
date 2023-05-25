@@ -1,6 +1,5 @@
 .idea
-src/data/task_data
 .gitattributes
 .vscode
 __pycache__
-src/data/month_count_rate.txt
+data

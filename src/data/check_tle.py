@@ -4,7 +4,7 @@ from skyfield.api import load, EarthSatellite
 
 
 def read_tle():
-    with open('../data/tle/tle.txt') as f:
+    with open('../../data/raw/tle.txt') as f:
         return f.read()
 
 
@@ -36,7 +36,7 @@ def get_sat():
 def main():
     lst_sat = get_sat()
     cnt_bad = 0
-    with open("../data/tle/actual_tle.txt", "w") as actual_tle:
+    with open("../../data/interim/actual_tle.txt", "w") as actual_tle:
         print(lst_sat[0][1], lst_sat[0][2], file=actual_tle, sep='\n') # this tle is fine
         for i in range(1, len(lst_sat) - 1):
             cur_sat = lst_sat[i][0]

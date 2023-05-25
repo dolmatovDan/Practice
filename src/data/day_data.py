@@ -41,7 +41,7 @@ def get_directory_size(dir_name):
 def get_day_count_rate(day, save_data, tle_file):
     ts = load.timescale()
     cur_tle = TLE(tle_file)
-    count_rate_data = './task_data/krf200903{:02d}_1_S2_bg.thr'.format(day) # * was S1
+    count_rate_data = './task_data/krf200903{:02d}_1_S1_bg.thr'.format(day)
 
     with open(count_rate_data, "r") as rate_data, open(save_data, "w") as data:
         for line in rate_data:
@@ -92,7 +92,7 @@ def split_day_count_rate(day_count_rate, date):
     # print(sum([len(x) for x in lst_orbit]))
 
     dir_name = f'orbit_{date}'
-    dir_name = os.path.join('../data/orbits', dir_name)
+    dir_name = os.path.join('../../data/interim/orbits', dir_name)
     create_directory(dir_name)
 
     for index, orbit in enumerate(lst_orbit):
@@ -112,30 +112,10 @@ def split_day_count_rate(day_count_rate, date):
 
 
 
-def month_count_rate(save_file):
-    dir_name = '../data/day_count_rates'
-    for day in range(1, 32):
-        file_name = f'count_rate_200903{day:02d}.txt'
-        file_name = os.path.join(dir_name, file_name)
-        # get_day_count_rate(day, file_name, tle_file)
-    
-    with open(save_file, "w") as data:
-        for day in range(1, 32):
-            file_name = f'count_rate_200903{day:02d}'
-            file_name = os.path.join(dir_name, file_name)
-            
-            str_data = read_text_file(file_name)
-            lst_data = [list(map(float, s.split())) for s in str_data.split('\n') if len(s.split()) > 0]
-            for line in lst_data:
-                print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}"
-                        .format(*line[1:4], *line[-2:]), file=data)
-
-
 def main():
     save_data = './day_count_rate.txt'
-    tle_file = '../data/tle/actual_tle.txt'
+    tle_file = '../../data/interim/actual_tle.txt'
     mean_stable_range = './mean_stable_range.txt'
-    month_count_rate_file = '../data/month_count_rate.txt'
 
 
 if __name__ == '__main__':

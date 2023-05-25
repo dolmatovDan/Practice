@@ -100,7 +100,7 @@ def read_plot_data(det, idx_range, path_plot_data):
 
 
 def plot_data():
-    path_plot_data = '../data/plot_data'
+    path_plot_data = '../../data/interim/plot_data'
 
     det, idx_range = 2, 1
 

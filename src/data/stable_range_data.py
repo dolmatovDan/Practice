@@ -36,12 +36,12 @@ def get_stable_file_count_rate_range(file_name):
 
 def get_stable_day_count_rate_range(date):
     dir_name = f'orbit_{date}'
-    dir_name = os.path.join('../data/orbits', dir_name)
+    dir_name = os.path.join('../../data/interim/orbits', dir_name)
 
     res = 0
     cnt_files = get_directory_size(dir_name)
 
-    with open('../data/stable_range.txt', "w") as save_data:
+    with open('../../data/interim/stable_range.txt', "w") as save_data:
         for index in range(cnt_files):
             file_name = f'{date}_{index:02d}.txt'
             file_name = os.path.join(dir_name, file_name)
