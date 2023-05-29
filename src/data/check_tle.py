@@ -71,6 +71,4 @@ def main():
         print(lst_sat[-1][1], lst_sat[-1][2], file=actual_tle, sep='\n') # this tle is fine
     # print(cnt_bad)
 
-
-if __name__ == "__main__":
-    main()
+main()
