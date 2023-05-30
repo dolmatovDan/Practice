@@ -77,6 +77,18 @@ class TLE:
 
         return cur_long, cur_lat, days_from_epoch
 
+    def get_radec(self, time_ts):
+        idx, t_epoch = self.get_nearest_time(time_ts, self.lst_epoch)
+
+        days_from_epoch = time_ts - t_epoch
+
+        geoposition = self.lst_sat[idx].at(time_ts)
+
+        ra, dec, distance = geoposition.radec()
+        dist_to_earth = geoposition.distance().km
+
+        return ra, dec, dist_to_earth
+
 
 class KRF_BgTH:
     n_channels_1 = 12
