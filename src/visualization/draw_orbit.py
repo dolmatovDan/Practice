@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import bisect
 import os
+import matplotlib as mpl
+
+mpl.rcParams["figure.dpi"] = 100
 
 
 def create_directory(name):
@@ -31,15 +34,13 @@ def get_lat_ticks(times, pair_time_lat):
 
 
 def read_text_file(name):
-    with open(name, "w") as f:
+    with open(name, "r") as f:
         return f.read()
 
 
 def get_day_data(name):
     str_data = read_text_file(name)
-    lst_data = [
-        list(map(float, s.split())) for s in str_data.split("\n") if len(s.split()) > 0
-    ]
+    lst_data = [s for s in str_data.split("\n") if len(s.split()) > 0]
     lst_time = []
     lst_lat = []
     lst_count_rate = []
@@ -52,6 +53,7 @@ def get_day_data(name):
     points_color = []
 
     for data in lst_data[3:]:
+        data = list(map(float, data.split()))
         lst_time.append(data[0])
         lst_lat.append(round(data[-2], 2))
         lst_count_rate.append(sum(data[1:4]))
@@ -77,6 +79,7 @@ def get_day_data(name):
 
 def draw_orbit(date, save_folder, data_folder):
     folder_size = get_directory_size(data_folder)
+
     for index in range(folder_size):
         data = get_day_data(f"{data_folder}/{date}_{index:02d}.txt")
 
@@ -87,7 +90,7 @@ def draw_orbit(date, save_folder, data_folder):
         title_data = f"{data[4]}{data[5]}{data[6]}"
         points_color = data[7]
 
-        fig, ax = plt.subplots(figsize=(24, 18))
+        fig, ax = plt.subplots(figsize=(24, 16))
 
         ax1 = ax.twiny()
 
@@ -120,13 +123,14 @@ def draw_orbit(date, save_folder, data_folder):
         ax1.tick_params(rotation=45, labelsize=17)
 
         ax.tick_params(rotation=45, labelsize=17)
+
         ax.set_xlabel("Time (s)", fontsize=35)
         ax.set_ylabel("Count Speed", fontsize=35)
         ax.set_yticks(np.arange(0, 20000, 1000))
+        ax.set_ylim([10, 20000])
 
         plt.semilogy()
 
-        ax.set_ylim([10, 20000])
         ax.grid(which="major", color=[0.4, 0.4, 0.4])
         ax.grid(which="minor", color=[0.7, 0.7, 0.7], linestyle="--")
         ax.minorticks_on()

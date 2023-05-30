@@ -47,7 +47,7 @@ def get_directory_size(dir_name):
 def get_day_count_rate(day, save_data, tle_file):
     ts = load.timescale()
     cur_tle = TLE(tle_file)
-    count_rate_data = "../../data/raw/task_data/krf200903{:02d}_1_S1_bg.thr".format(day)
+    count_rate_data = f"../../data/raw/task_data/krf200903{day:02d}_1_S1_bg.thr"
 
     with open(count_rate_data, "r") as rate_data, open(save_data, "w") as data:
         for line in rate_data:
@@ -147,13 +147,41 @@ def split_day_count_rate(day_count_rate, date):
                 )
 
 
+def get_ICRS_coordinates(day, data_file, tle_file, save_file):
+    str_data = read_text_file(data_file)
+    lst_data = [
+        list(map(float, s.split()))
+        for s in str_data.split("\n")[3:]
+        if len(s.split()) > 0
+    ]
+
+    ts = load.timescale()
+    cur_tle = TLE(tle_file)
+
+    with open(save_file, "w") as save_data:
+        for data in lst_data:
+            cur_second = data[0]
+            cur_hhmmss = convert_hhmmss_to_date(sod_to_hhmmss(cur_second))
+            time_ts = ts.utc(2009, 3, day, *cur_hhmmss)
+            ra, dec, distance = cur_tle.get_radec(time_ts)
+            print(f"{cur_second}   {ra}   {dec}   {distance:.03f}", file=save_data)
+            lat, long, distance = cur_tle.get_geo_pos(time_ts)
+
+
 def main():
     save_data = "../../data/interim/day_count_rate.txt"
     tle_file = "../../data/interim/actual_tle.txt"
 
-    for day in range(24, 32):
-        get_day_count_rate(day, save_data, tle_file)
-        split_day_count_rate(save_data, f"200903{day:02d}")
+    day = 12
+    # orbit_num = 3
+    # get_ICRS_coordinates(
+    #     day,
+    #     f"../../data/interim/orbits/orbit_200903{day:02d}/200903{day:02d}_{orbit_num:02d}.txt",
+    #     tle_file,
+    #     f"../../data/interim/orbit_200903{day:02d}_{orbit_num:02d}_data.txt",
+    # )
+    get_day_count_rate(day, save_data, tle_file)
+    split_day_count_rate(save_data, f"200903{day:02d}")
 
 
 if __name__ == "__main__":
