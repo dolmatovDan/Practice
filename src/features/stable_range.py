@@ -32,8 +32,8 @@ def get_trendline(x, y):
     return trendline
 
 
-def parse_data(file_data):
-    str_data = read_text_file(file_data)
+def parse_data(file_name):
+    str_data = read_text_file(file_name)
     lst_data = [s for s in str_data.split("\n") if len(s.split()) > 0]
     x = []
     y = []
@@ -65,6 +65,11 @@ def get_good_points(arr_x, arr_y):
             is_good[index] = True
 
     return is_good, trendline
+
+
+def get_good_points_from_file(file_name):
+    x, y = parse_data(file_name)
+    return get_good_points(x, y)
 
 
 def get_stable_file_count_rate_range(file_name):
