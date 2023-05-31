@@ -1,67 +1,107 @@
+import numpy as np
+from matplotlib import pyplot as plt
 import os
 
 
-def read_text_file(file_name):
-    with open(file_name) as f:
+def read_text_file(file):
+    with open(file, "r") as f:
         return f.read()
-    
-    
+
+
 def create_directory(name):
     if os.path.isdir(name):
-        print(f'Directory {name} already exists')
+        print(f"Directory {name} already exists")
     else:
-        path = './' + name
+        path = "./" + name
         os.mkdir(path)
 
 
 def get_directory_size(dir_name):
-    return len([name for name in os.listdir(dir_name) if os.path.isfile(os.path.join(dir_name, name))])
+    return len(
+        [
+            name
+            for name in os.listdir(dir_name)
+            if os.path.isfile(os.path.join(dir_name, name))
+        ]
+    )
+
+
+def get_trendline(x, y):
+    equation = np.polyfit(x, y, 1)
+    trendline = np.poly1d(equation)
+    return trendline
+
+
+def parse_data(file_data):
+    str_data = read_text_file(file_data)
+    lst_data = [s for s in str_data.split("\n") if len(s.split()) > 0]
+    x = []
+    y = []
+    for data in lst_data[3:]:
+        data = list(map(float, data.split()))
+        y.append(sum(data[1:5]))
+        x.append(data[0])
+    return x, y
+
+
+def get_good_points(arr_x, arr_y):
+    df = []
+    for x, y in zip(arr_x, arr_y):
+        df.append([x, y])
+    df.sort(key=lambda x: x[1])
+
+    lower_bound = int(len(arr_x) * 0.4)
+    upper_bound = int(len(arr_x) * 0.5)
+    definitely_good_points = df[lower_bound:upper_bound]
+    good_x, good_y = zip(*definitely_good_points)
+
+    trendline = get_trendline(good_x, good_y)
+
+    is_good = [False] * len(arr_x)
+
+    for index, (x, y) in enumerate(zip(arr_x, arr_y)):
+        dif = abs(trendline(x) - y)
+        if dif / trendline(x) < 0.5:
+            is_good[index] = True
+
+    return is_good, trendline
 
 
 def get_stable_file_count_rate_range(file_name):
-    str_count_rate = read_text_file(file_name)
-    lst_count_rate = [list(map(float, s.split())) for s in str_count_rate.split('\n')[3:] if len(s.split()) > 0]
-    range_duration = len(lst_count_rate)
+    cnt_good_points = 0
 
-    good_lower_bound = 500
-    good_upper_bound = 2000
-    cnt_good_points = 0 # count_rate from good_lower_bound to good_upper_bound
+    arr_x, arr_y = parse_data(file_name)
+    arr_x = np.array(arr_x)
+    arr_y = np.array(arr_y)
 
-    for line in lst_count_rate:
-        cur_count_rate = sum(line[1:4])
-        if cur_count_rate > good_lower_bound and cur_count_rate < good_upper_bound:
+    good_points, trendline = get_good_points(arr_x, arr_y)
+
+    for point in good_points:
+        if point:
             cnt_good_points += 1
-    return cnt_good_points / range_duration
+    return cnt_good_points / len(arr_x)
 
 
-def get_stable_day_count_rate_range(date):
-    dir_name = f'orbit_{date}'
-    dir_name = os.path.join('../../data/interim/orbits', dir_name)
+def get_stable_day_count_rate_range(day):
+    dir_name = f"../../data/interim/orbits/orbit_200903{day:02d}"
+    dir_size = get_directory_size(dir_name)
 
-    res = 0
-    cnt_files = get_directory_size(dir_name)
+    sum_stable_range = 0
+    for index in range(dir_size):
+        file_name = f"{dir_name}/200903{day:02d}_{index:02d}.txt"
+        cur_stable_range = get_stable_file_count_rate_range(file_name)
+        sum_stable_range += cur_stable_range
 
-    with open('../../data/interim/stable_range.txt', "w") as save_data:
-        for index in range(cnt_files):
-            file_name = f'{date}_{index:02d}.txt'
-            file_name = os.path.join(dir_name, file_name)
-            cur_range_duration = get_stable_file_count_rate_range(file_name)
-            res += cur_range_duration
+    return sum_stable_range / dir_size
 
-            # print(f'{index:02d}   {cur_range_duration:05.3f}', file=save_data)
-
-    res /= cnt_files
-    return res
 
 def main():
-    sum_stable_range = 0
+    mean_stable_range = 0
     for day in range(1, 32):
-        cur_date = f'200903{day:02d}'
-        stable_day_count_rate_range = get_stable_day_count_rate_range(cur_date)
-        sum_stable_range += stable_day_count_rate_range
-        
-    mean_stable_range = sum_stable_range / 31
-    print(mean_stable_range)
+        cur_stable_range = get_stable_day_count_rate_range(day)
+        mean_stable_range += cur_stable_range
+    print(mean_stable_range / 31)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
