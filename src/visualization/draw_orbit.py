@@ -1,8 +1,12 @@
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import bisect
 import os
 import matplotlib as mpl
+
+sys.path.append("../features")
+from stable_range import get_good_points
 
 mpl.rcParams["figure.dpi"] = 100
 
@@ -50,17 +54,11 @@ def get_day_data(name):
     str_time_duration = lst_data[1]
     str_long_range = lst_data[2]
 
-    points_color = []
-
     for data in lst_data[3:]:
         data = list(map(float, data.split()))
         lst_time.append(data[0])
         lst_lat.append(round(data[-2], 2))
         lst_count_rate.append(sum(data[1:4]))
-        if sum(data[1:4]) > 500 and sum(data[1:4]) < 2000:
-            points_color.append("lightgreen")
-        else:
-            points_color.append("blue")
 
         lst_pair_time_lat[0].append(data[0])
         lst_pair_time_lat[1].append(data[-2])
@@ -73,8 +71,16 @@ def get_day_data(name):
         str_time_range,
         str_time_duration,
         str_long_range,
-        points_color,
     ]
+
+
+def get_colors(x, y):
+    good_points, trendline = get_good_points(x, y)
+    colors = ["blue"] * len(x)
+    for i in range(len(x)):
+        if good_points[i]:
+            colors[i] = "lightgreen"
+    return colors
 
 
 def draw_orbit(date, save_folder, data_folder):
@@ -87,14 +93,15 @@ def draw_orbit(date, save_folder, data_folder):
         lat = data[1]
         time = data[2]
         pair_time_lat = data[3]
-        title_data = f"{data[4]}{data[5]}{data[6]}"
-        points_color = data[7]
+        title_data = f"{data[4]}\n{data[5]}\n{data[6]}"
 
         fig, ax = plt.subplots(figsize=(24, 16))
 
         ax1 = ax.twiny()
 
-        ax.scatter(time, count_rate, color=points_color, linewidth=1.25, s=15)
+        colors = get_colors(time, count_rate)
+
+        ax.scatter(time, count_rate, color=colors, linewidth=1.25, s=15)
 
         plt.annotate(
             title_data,

@@ -1,7 +1,11 @@
 import os
+import sys
 import numpy as np
 from matplotlib import pyplot as plt
-from ..features.stable_range import get_good_points, parse_data
+
+
+sys.path.append("../features")
+from stable_range import get_good_points, parse_data
 
 
 def read_text_file(file):
@@ -28,7 +32,7 @@ def get_directory_size(dir_name):
 
 
 def main():
-    for day in range(1, 2):
+    for day in range(1, 32):
         create_directory(f"../../reports/figures/test/200903{day:02d}")
         for index in range(
             get_directory_size(f"../../data/interim/orbits/orbit_200903{day:02d}")
