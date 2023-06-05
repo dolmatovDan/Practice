@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 
 sys.path.append("../features")
-from stable_range import get_good_points, parse_data
+from src.utility.stable_range import get_good_points, parse_data
 
 
 def read_text_file(file):

@@ -5,10 +5,8 @@ import bisect
 import os
 import matplotlib as mpl
 
-sys.path.append("../features")
-from stable_range import get_good_points
-
-mpl.rcParams["figure.dpi"] = 100
+sys.path.append("..")
+from utility import get_good_points
 
 
 def create_directory(name):
