@@ -61,7 +61,7 @@ def get_good_points(arr_x, arr_y):
 
     for index, (x, y) in enumerate(zip(arr_x, arr_y)):
         dif = abs(trendline(x) - y)
-        if dif / trendline(x) < 0.5:
+        if dif / abs(trendline(x)) < 0.5:
             is_good[index] = True
 
     return is_good, trendline
