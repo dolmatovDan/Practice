@@ -10,18 +10,18 @@ def read_text_file(file):
 
 def create_folder(name):
     if os.path.isdir(name):
-        print(f"folder {name} already exists")
+        print(f"Folder {name} already exists")
     else:
-        path = "./" + name
+        path = name
         os.mkdir(path)
 
 
-def get_folder_size(dir_name):
+def get_folder_size(folder_name):
     return len(
         [
             name
-            for name in os.listdir(dir_name)
-            if os.path.isfile(os.path.join(dir_name, name))
+            for name in os.listdir(folder_name)
+            if os.path.isfile(os.path.join(folder_name, name))
         ]
     )
 

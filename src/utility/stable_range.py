@@ -3,8 +3,8 @@ from matplotlib import pyplot as plt
 import os
 import sys
 
-sys.path.append("..")
-from utility import read_text_file, get_folder_size, YEAR, MONTH
+
+from . import read_text_file, get_folder_size, YEAR, MONTH
 
 
 def get_trendline(x, y):

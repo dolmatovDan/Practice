@@ -5,6 +5,7 @@ from skyfield.api import load
 import os
 
 sys.path.append("..")
+print(sys.path)
 from utility import read_text_file, create_folder, YEAR, MONTH
 
 
@@ -29,7 +30,7 @@ def get_day_count_rate(day, save_data, tle_file):
                 continue
 
             cur_hhmmss = convert_hhmmss_to_date(sod_to_hhmmss(cur_second))
-            time_ts = ts.utc(2009, 3, day, *cur_hhmmss)
+            time_ts = ts.utc(YEAR, MONTH, day, *cur_hhmmss)
 
             cur_long, cur_lat, days_from_epoch = cur_tle.get_geo_pos(time_ts)
             print(
@@ -132,8 +133,8 @@ def get_ICRS_coordinates(day, data_file, tle_file, save_file):
             cur_hhmmss = convert_hhmmss_to_date(sod_to_hhmmss(cur_second))
             time_ts = ts.utc(YEAR, MONTH, day, *cur_hhmmss)
             ra, dec, distance = cur_tle.get_radec(time_ts)
-            print(f"{cur_second}   {ra}   {dec}   {distance:.03f}", file=save_data)
-            lat, long, distance = cur_tle.get_geo_pos(time_ts)
+            lat, long, days_from_epoch = cur_tle.get_geo_pos(time_ts)
+            print(f"{cur_second}   {lat}   {long}   {distance:.03f}", file=save_data)
 
 
 def main():
@@ -142,15 +143,15 @@ def main():
 
     day = 12
     date = f"{YEAR}{MONTH:02d}{day:02d}"
-    # orbit_num = 3
-    # get_ICRS_coordinates(
-    #     day,
-    #     f"../../data/interim/orbits/orbit_200903{day:02d}/200903{day:02d}_{orbit_num:02d}.txt",
-    #     tle_file,
-    #     f"../../data/interim/orbit_200903{day:02d}_{orbit_num:02d}_data.txt",
-    # )
-    get_day_count_rate(day, save_data, tle_file)
-    split_day_count_rate(save_data, date)
+    orbit_num = 3
+    get_ICRS_coordinates(
+        day,
+        f"../../data/interim/orbits/orbit_{date}/{date}_{orbit_num:02d}.txt",
+        tle_file,
+        f"../../data/interim/orbit_{date}_{orbit_num:02d}_data.txt",
+    )
+    # get_day_count_rate(day, save_data, tle_file)
+    # split_day_count_rate(save_data, date)
 
 
 if __name__ == "__main__":
