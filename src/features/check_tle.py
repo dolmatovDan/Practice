@@ -2,6 +2,9 @@ import sys
 import numpy as np
 from skyfield.api import load, EarthSatellite
 
+sys.path.append("..")
+from utility import MONTH, YEAR, get_month_range
+
 
 def read_tle():
     with open("../../data/raw/tle.txt") as f:
@@ -15,13 +18,12 @@ def get_time(sat):
     cur_day = cur_date[1].split("-")
     res_arr = [
         int(cur_day[0]),
-        3,
+        MONTH,
         int(cur_day[2]),
         cur_time[0],
         cur_time[1],
         cur_time[2],
     ]
-    #                           ^ - month number
     return ts.utc(*res_arr)
 
 
@@ -32,9 +34,13 @@ def get_sat():
     lst_tle = [(l1, l2) for l1, l2 in zip(lst_lines[:-1:2], lst_lines[1::2])]
 
     lst_sat = []
+
+    month_range = get_month_range(MONTH, YEAR)
+    month_day_min = month_range[0]
+    month_day_max = month_range[1]
     for tle in lst_tle:
         day = float(tle[0].split()[3][2:])
-        if day >= 60 and day <= 91:
+        if day >= month_day_min and day <= month_day_max:
             lst_sat.append(
                 (EarthSatellite(tle[0], tle[1], "KORONAS-FOTON"), tle[0], tle[1])
             )

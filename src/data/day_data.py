@@ -81,12 +81,12 @@ def split_day_count_rate(day_count_rate, date):
     # print(len(lst_orbit))
     # print(sum([len(x) for x in lst_orbit]))
 
-    dir_name = f"orbit_{date}"
-    dir_name = os.path.join("../../data/interim/orbits", dir_name)
-    create_folder(dir_name)
+    folder_name = f"orbit_{date}"
+    folder_name = os.path.join("../../data/interim/orbits", folder_name)
+    create_folder(folder_name)
 
     for index, orbit in enumerate(lst_orbit):
-        file_name = os.path.join(f"{dir_name}", f"{date}_{index:02d}.txt")
+        file_name = os.path.join(f"{folder_name}", f"{date}_{index:02d}.txt")
         with open(file_name, "w") as save_data:
             print(
                 "Time range: [ {start}  {end} ]".format(

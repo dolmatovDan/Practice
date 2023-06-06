@@ -1,29 +1,10 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import os
+import sys
 
-
-def read_text_file(file):
-    with open(file, "r") as f:
-        return f.read()
-
-
-def create_directory(name):
-    if os.path.isdir(name):
-        print(f"Directory {name} already exists")
-    else:
-        path = "./" + name
-        os.mkdir(path)
-
-
-def get_directory_size(dir_name):
-    return len(
-        [
-            name
-            for name in os.listdir(dir_name)
-            if os.path.isfile(os.path.join(dir_name, name))
-        ]
-    )
+sys.path.append("..")
+from utility import read_text_file, get_folder_size, YEAR, MONTH
 
 
 def get_trendline(x, y):
@@ -87,23 +68,24 @@ def get_stable_file_count_rate_range(file_name):
     return cnt_good_points / len(arr_x)
 
 
-def get_stable_day_count_rate_range(day):
-    dir_name = f"../../data/interim/orbits/orbit_200903{day:02d}"
-    dir_size = get_directory_size(dir_name)
+def get_stable_day_count_rate_range(date):
+    folder_name = f"../../data/interim/orbits/orbit_{date}"
+    folder_size = get_folder_size(folder_name)
 
     sum_stable_range = 0
-    for index in range(dir_size):
-        file_name = f"{dir_name}/200903{day:02d}_{index:02d}.txt"
+    for index in range(folder_size):
+        file_name = f"{folder_name}/{date}_{index:02d}.txt"
         cur_stable_range = get_stable_file_count_rate_range(file_name)
         sum_stable_range += cur_stable_range
 
-    return sum_stable_range / dir_size
+    return sum_stable_range / folder_size
 
 
 def main():
     mean_stable_range = 0
     for day in range(1, 32):
-        cur_stable_range = get_stable_day_count_rate_range(day)
+        date = f"{YEAR}{MONTH}{day:02d}"
+        cur_stable_range = get_stable_day_count_rate_range(date)
         mean_stable_range += cur_stable_range
     print(mean_stable_range / 31)
 
