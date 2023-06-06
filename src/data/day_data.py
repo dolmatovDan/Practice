@@ -1,47 +1,15 @@
 import sys
 from map_data_ds import TLE
+from map_data_ds import sod_to_hhmmss
 from skyfield.api import load
 import os
 
-
-def sod_to_hhmmss(seconds):
-    if seconds < 0 or seconds > 86400:
-        print(f"Incorrect {seconds=}")
-        sys.exit()
-
-    hours = int(seconds / 3600)
-    seconds -= 3600.0 * hours
-    minutes = int(seconds / 60.0)
-    seconds -= int(60.0 * minutes)
-
-    return "{:02d}:{:02d}:{:06.3f}".format(hours, minutes, seconds)
+sys.path.append("..")
+from utility import read_text_file, create_folder, YEAR, MONTH
 
 
 def convert_hhmmss_to_date(date):
     return list(map(float, date.split(":")))
-
-
-def read_text_file(file_name):
-    with open(file_name) as f:
-        return f.read()
-
-
-def create_directory(name):
-    if os.path.isdir(name):
-        print(f"Directory {name} already exists")
-    else:
-        path = "./" + name
-        os.mkdir(path)
-
-
-def get_directory_size(dir_name):
-    return len(
-        [
-            name
-            for name in os.listdir(dir_name)
-            if os.path.isfile(os.path.join(dir_name, name))
-        ]
-    )
 
 
 def get_day_count_rate(day, save_data, tle_file):
@@ -98,9 +66,9 @@ def split_day_count_rate(day_count_rate, date):
         if len(lst_orbit[-1]) <= 1:
             lst_orbit[-1].append(line)
         else:
-            if (lst_orbit[-1][-1][-2] - lst_orbit[-1][-2][-2]) * (
-                cur_lat - lst_orbit[-1][-1][-2]
-            ) > 0 or len(
+            prev_lat_delta = lst_orbit[-1][-1][-2] - lst_orbit[-1][-2][-2]
+            cur_lat_delta = cur_lat - lst_orbit[-1][-1][-2]
+            if (prev_lat_delta) * (cur_lat_delta) > 0 or len(
                 lst_orbit[-1]
             ) <= 5:  # need this condition, because otherwise several points are lost
                 # 3 - max count of zero derivative in a row (5 > 3)
@@ -115,7 +83,7 @@ def split_day_count_rate(day_count_rate, date):
 
     dir_name = f"orbit_{date}"
     dir_name = os.path.join("../../data/interim/orbits", dir_name)
-    create_directory(dir_name)
+    create_folder(dir_name)
 
     for index, orbit in enumerate(lst_orbit):
         file_name = os.path.join(f"{dir_name}", f"{date}_{index:02d}.txt")
@@ -162,7 +130,7 @@ def get_ICRS_coordinates(day, data_file, tle_file, save_file):
         for data in lst_data:
             cur_second = data[0]
             cur_hhmmss = convert_hhmmss_to_date(sod_to_hhmmss(cur_second))
-            time_ts = ts.utc(2009, 3, day, *cur_hhmmss)
+            time_ts = ts.utc(YEAR, MONTH, day, *cur_hhmmss)
             ra, dec, distance = cur_tle.get_radec(time_ts)
             print(f"{cur_second}   {ra}   {dec}   {distance:.03f}", file=save_data)
             lat, long, distance = cur_tle.get_geo_pos(time_ts)
@@ -173,6 +141,7 @@ def main():
     tle_file = "../../data/interim/actual_tle.txt"
 
     day = 12
+    date = f"{YEAR}{MONTH:02d}{day:02d}"
     # orbit_num = 3
     # get_ICRS_coordinates(
     #     day,
@@ -181,7 +150,7 @@ def main():
     #     f"../../data/interim/orbit_200903{day:02d}_{orbit_num:02d}_data.txt",
     # )
     get_day_count_rate(day, save_data, tle_file)
-    split_day_count_rate(save_data, f"200903{day:02d}")
+    split_day_count_rate(save_data, date)
 
 
 if __name__ == "__main__":

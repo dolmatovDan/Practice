@@ -1,9 +1,8 @@
+import sys
 from matplotlib import pyplot as plt
 
-
-def read_text_file(file):
-    with open(file, "r") as f:
-        return f.read()
+sys.path.append("..")
+from utility import read_text_file
 
 
 def draw_hist(data, name):

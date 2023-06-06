@@ -6,25 +6,7 @@ import os
 import matplotlib as mpl
 
 sys.path.append("..")
-from utility import get_good_points
-
-
-def create_directory(name):
-    if os.path.isdir(name):
-        print(f"Directory {name} already exists")
-    else:
-        path = "./" + name
-        os.mkdir(path)
-
-
-def get_directory_size(dir_name):
-    return len(
-        [
-            name
-            for name in os.listdir(dir_name)
-            if os.path.isfile(os.path.join(dir_name, name))
-        ]
-    )
+from utility import get_good_points, create_folder, get_folder_size, read_text_file
 
 
 def get_lat_ticks(times, pair_time_lat):
@@ -33,11 +15,6 @@ def get_lat_ticks(times, pair_time_lat):
         pos = pair_time_lat[1][bisect.bisect_left(pair_time_lat[0], time)]
         tick_labels.append(str(pos))
     return tick_labels
-
-
-def read_text_file(name):
-    with open(name, "r") as f:
-        return f.read()
 
 
 def get_day_data(name):
@@ -82,7 +59,7 @@ def get_colors(x, y):
 
 
 def draw_orbit(date, save_folder, data_folder):
-    folder_size = get_directory_size(data_folder)
+    folder_size = get_folder_size(data_folder)
 
     for index in range(folder_size):
         data = get_day_data(f"{data_folder}/{date}_{index:02d}.txt")
@@ -149,7 +126,7 @@ def draw_orbit(date, save_folder, data_folder):
 def main():
     date = "20090312"
     save_folder = f"../../reports/figures/orbit_{date}"
-    create_directory(save_folder)
+    create_folder(save_folder)
     data_folder = f"../../data/interim/orbits/orbit_{date}"
     draw_orbit(date, save_folder, data_folder)
 
