@@ -4,7 +4,8 @@ import os
 import sys
 
 
-from . import read_text_file, get_folder_size, YEAR, MONTH
+from utility.methods import read_text_file, get_folder_size
+from utility.constants import YEAR, MONTH
 
 
 def get_trendline(x, y):
