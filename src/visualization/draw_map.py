@@ -7,23 +7,23 @@ import matplotlib.colors as mcolors
 
 
 class Plot:
-    def __init__(self, plotNum, start, finish):
+    def __init__(self, plot_num, start, finish):
         self.label = [
             "Скорость счета для верхнего датчика в первом диапазоне",
             "Скорость счета для нижнего датчика в " "первом диапазоне",
             "Скорость счета для верхнего датчика во втором диапазоне",
             "Скорость счета для нижнего датчика " "во втором диапазоне",
-        ][plotNum - 1]
+        ][plot_num - 1]
         self.filename = [
-            "./map_data/plot_data_1_S1.txt",
-            "plot_data_1_S2.txt",
-            "plot_data_2_S1.txt",
-            "plot_data_2_S2.txt",
-        ][plotNum - 1]
+            "../../data/interim/map_data/plot_data_1_S1.txt",
+            "../../data/interim/map_data/plot_data_1_S2.txt",
+            "../../data/interim/map_data/plot_data_2_S1.txt",
+            "../../data/interim/map_data/plot_data_2_S2.txt",
+        ][plot_num - 1]
         self.ax = plt.subplot()
         self.start = start
         self.finish = finish
-        self.const = [np.log10(100000), 262275, 269610, 274050][plotNum - 1]
+        self.const = [np.log10(100000), 262275, 269610, 274050][plot_num - 1]
         self.m = Basemap(
             projection="cyl",
             resolution="c",
@@ -65,27 +65,24 @@ class Plot:
         y = []
         t = []
         self.const = np.log10(100000)
-        el = 200000000
         with open(self.filename) as file:
-            counter = 0
+            step = 0
             for line in file:
-                if self.start < counter < self.finish:
+                if self.start < step < self.finish:
                     lst1 = list(map(float, line.split()))
                     cur_count_rates = lst1[0:3]
                     cur_count_rates.sort()
-                    if cur_count_rates[1] > 0:
-                        el = min(el, np.log10(sum(cur_count_rates)))
-                        t.append(
-                            plt.cm.coolwarm(
-                                (np.log10(sum(cur_count_rates)) - 2) / self.const
-                            )
+                    cur_count_rates[1] += 1
+                    el = min(el, np.log10(sum(cur_count_rates)))
+                    t.append(
+                        plt.cm.coolwarm(
+                            (np.log10(sum(cur_count_rates)) - 2) / self.const
                         )
-                        x.append(lst1[-1])
-                        y.append(lst1[-2])
-                counter += 1
+                    )
+                    x.append(lst1[-1])
+                    y.append(lst1[-2])
+                step += 1
         plt.scatter(x, y, c=t, s=1, zorder=1, alpha=0.5)
-        # print(sorted(ar))
-        print(el)
 
     def draw_plot(self):
         plt.show()
