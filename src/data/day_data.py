@@ -5,7 +5,6 @@ from skyfield.api import load
 import os
 
 sys.path.append("..")
-print(sys.path)
 from utility import read_text_file, create_folder, YEAR, MONTH
 
 
@@ -34,11 +33,9 @@ def get_day_count_rate(day, save_data, tle_file):
 
             cur_long, cur_lat, days_from_epoch = cur_tle.get_geo_pos(time_ts)
             print(
-                "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+                "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
                     cur_second,
-                    cur_count_rate_25_100,
-                    cur_count_rate_100_400,
-                    cur_count_rate_400_640,
+                    cur_count_rate,
                     cur_lat,
                     cur_long,
                 ),
@@ -109,9 +106,7 @@ def split_day_count_rate(day_count_rate, date):
 
             for line in orbit:
                 print(
-                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
-                        *line
-                    ),
+                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(*line),
                     file=save_data,
                 )
 
@@ -134,7 +129,10 @@ def get_ICRS_coordinates(day, data_file, tle_file, save_file):
             time_ts = ts.utc(YEAR, MONTH, day, *cur_hhmmss)
             ra, dec, distance = cur_tle.get_radec(time_ts)
             lat, long, days_from_epoch = cur_tle.get_geo_pos(time_ts)
-            print(f"{cur_second}   {lat}   {long}   {distance:.03f}", file=save_data)
+            print(
+                f"{cur_second}   {ra._degrees:.03f}   {dec._degrees:.03f}   {distance:.03f}",
+                file=save_data,
+            )
 
 
 def main():

@@ -85,6 +85,7 @@ class TLE:
         geoposition = self.lst_sat[idx].at(time_ts)
 
         ra, dec, distance = geoposition.radec()
+
         dist_to_earth = geoposition.distance().km
 
         return ra, dec, dist_to_earth
