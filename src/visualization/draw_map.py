@@ -15,7 +15,7 @@ class Plot:
             "Скорость счета для нижнего датчика " "во втором диапазоне",
         ][plotNum - 1]
         self.filename = [
-            "./plot_data/plot_data_1_S1.txt",
+            "./map_data/plot_data_1_S1.txt",
             "plot_data_1_S2.txt",
             "plot_data_2_S1.txt",
             "plot_data_2_S2.txt",
