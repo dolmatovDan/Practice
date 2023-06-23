@@ -42,8 +42,8 @@ class Plot:
         plt.set_cmap("coolwarm")
         self.cbar = plt.colorbar(
             matplotlib.cm.ScalarMappable(norm=self.norm, cmap=self.cmap),
-            label="Скорость счета",
         )
+        self.cbar.set_label(r"$log_{10} (count\;rate,\;count/s)$", fontsize=15)
         self.cbar.set_ticks(np.arange(0, 5.1, 0.5))
         self.ax.set_title(
             self.label, fontsize=20, fontfamily="serif", fontstyle="italic"

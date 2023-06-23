@@ -1,6 +1,7 @@
 import os
 import datetime
 import calendar
+from copy import deepcopy
 
 
 def read_text_file(file):
@@ -41,3 +42,11 @@ def get_month_range(month, year):
     last_day_diff = last_day - first_jan
 
     return (first_day_diff.days + 1, last_day_diff.days + 1)
+
+
+def get_mean_range(arr):
+    arr_copy = deepcopy(arr)
+    arr_copy.sort()
+    low = len(arr_copy) // 100 * 5
+    high = len(arr_copy) // 100 * 95
+    return arr_copy[low], arr_copy[high]

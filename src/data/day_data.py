@@ -33,9 +33,11 @@ def get_day_count_rate(day, save_data, tle_file):
 
             cur_long, cur_lat, days_from_epoch = cur_tle.get_geo_pos(time_ts)
             print(
-                "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+                "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
                     cur_second,
-                    cur_count_rate,
+                    cur_count_rate_25_100,
+                    cur_count_rate_100_400,
+                    cur_count_rate_400_640,
                     cur_lat,
                     cur_long,
                 ),
@@ -106,7 +108,9 @@ def split_day_count_rate(day_count_rate, date):
 
             for line in orbit:
                 print(
-                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(*line),
+                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+                        *line
+                    ),
                     file=save_data,
                 )
 
@@ -142,14 +146,14 @@ def main():
     day = 12
     date = f"{YEAR}{MONTH:02d}{day:02d}"
     orbit_num = 3
-    get_ICRS_coordinates(
-        day,
-        f"../../data/interim/orbits/orbit_{date}/{date}_{orbit_num:02d}.txt",
-        tle_file,
-        f"../../data/interim/orbit_{date}_{orbit_num:02d}_data.txt",
-    )
-    # get_day_count_rate(day, save_data, tle_file)
-    # split_day_count_rate(save_data, date)
+    # get_ICRS_coordinates(
+    #     day,
+    #     f"../../data/interim/orbits/orbit_{date}/{date}_{orbit_num:02d}.txt",
+    #     tle_file,
+    #     f"../../data/interim/orbit_{date}_{orbit_num:02d}_data.txt",
+    # )
+    get_day_count_rate(day, save_data, tle_file)
+    split_day_count_rate(save_data, date)
 
 
 if __name__ == "__main__":
