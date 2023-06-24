@@ -3,9 +3,8 @@ from matplotlib import pyplot as plt
 import os
 import sys
 
-
-from utility.methods import read_text_file, get_folder_size
-from utility.constants import YEAR, MONTH
+from methods import read_text_file, get_folder_size
+from constants import YEAR, MONTH
 
 
 def get_trendline(x, y):
@@ -43,7 +42,7 @@ def get_good_points(arr_x, arr_y):
 
     for index, (x, y) in enumerate(zip(arr_x, arr_y)):
         dif = abs(trendline(x) - y)
-        if dif < 0.5 * abs(trendline(x)):
+        if dif < 0.5 * abs(trendline(x)) or (trendline(x) > y and y > 0):
             is_good[index] = True
 
     return is_good, trendline
@@ -85,7 +84,7 @@ def get_stable_day_count_rate_range(date):
 def main():
     mean_stable_range = 0
     for day in range(1, 32):
-        date = f"{YEAR}{MONTH}{day:02d}"
+        date = f"{YEAR}{MONTH:02d}{day:02d}"
         cur_stable_range = get_stable_day_count_rate_range(date)
         mean_stable_range += cur_stable_range
     print(mean_stable_range / 31)

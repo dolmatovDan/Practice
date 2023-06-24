@@ -33,7 +33,7 @@ def get_day_data(name):
         data = list(map(float, data.split()))
         lst_time.append(data[0])
         lst_lat.append(round(data[-2], 2))
-        lst_count_rate.append(sum(data[1:4]))
+        lst_count_rate.append(data[3])
 
         lst_pair_time_lat[0].append(data[0])
         lst_pair_time_lat[1].append(data[-2])
@@ -108,10 +108,12 @@ def draw_orbit(date, save_folder, data_folder):
 
         ax.set_xlabel("Time (s)", fontsize=35)
         ax.set_ylabel("Count Speed", fontsize=35)
-        ax.set_yticks(np.arange(0, 20000, 1000))
-        ax.set_ylim([10, 20000])
+        # ax.set_yticks(np.arange(0, 20000, 1000))
+        # ax.set_ylim([10, 20000])
+        ax.set_ylim([0, 1000])
+        ax.set_yticks(np.arange(0, 1000, 100))
 
-        plt.semilogy()
+        # plt.semilogy()
 
         ax.grid(which="major", color=[0.4, 0.4, 0.4])
         ax.grid(which="minor", color=[0.7, 0.7, 0.7], linestyle="--")
@@ -124,7 +126,7 @@ def draw_orbit(date, save_folder, data_folder):
 
 
 def main():
-    date = "20090312"
+    date = "20090301"
     save_folder = f"../../reports/figures/orbit_{date}"
     create_folder(save_folder)
     data_folder = f"../../data/interim/orbits/orbit_{date}"
