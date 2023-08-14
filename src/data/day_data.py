@@ -21,9 +21,9 @@ def get_day_count_rate(day, save_data, tle_file):
         for line in rate_data:
             cur_data = list(map(float, line.split()))
             cur_second = cur_data[0]
-            cur_count_rate_25_100 = sum(cur_data[5:8])
-            cur_count_rate_100_400 = sum(cur_data[8:11])
-            cur_count_rate_400_640 = sum(cur_data[11:-2])
+            # cur_count_rate_25_100 = sum(cur_data[5:8])
+            # cur_count_rate_100_400 = sum(cur_data[8:11])
+            # cur_count_rate_400_640 = sum(cur_data[11:-2])
             cur_count_rate = sum(cur_data[5:-2])
             if cur_second < 0:
                 continue
@@ -32,12 +32,12 @@ def get_day_count_rate(day, save_data, tle_file):
             time_ts = ts.utc(YEAR, MONTH, day, *cur_hhmmss)
 
             cur_long, cur_lat, days_from_epoch = cur_tle.get_geo_pos(time_ts)
+            ra, dec, distance = cur_tle.get_radec(time_ts)
             print(
-                "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+                "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
                     cur_second,
-                    cur_count_rate_25_100,
-                    cur_count_rate_100_400,
-                    cur_count_rate_400_640,
+                    cur_count_rate,
+                    distance,
                     cur_lat,
                     cur_long,
                 ),
@@ -108,7 +108,7 @@ def split_day_count_rate(day_count_rate, date):
 
             for line in orbit:
                 print(
-                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
                         *line
                     ),
                     file=save_data,

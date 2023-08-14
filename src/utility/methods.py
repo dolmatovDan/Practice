@@ -50,3 +50,12 @@ def get_mean_range(arr):
     low = len(arr_copy) // 100 * 5
     high = len(arr_copy) // 100 * 95
     return arr_copy[low], arr_copy[high]
+
+def transform_date(date):
+    """
+    20090312 -> 2009-03-12
+    """
+    year = date[:4]
+    month = date[4:6]
+    day = date[6:]
+    return f"{year}-{month}-{day}"
