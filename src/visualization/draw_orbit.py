@@ -131,6 +131,21 @@ def main():
     create_folder(save_folder)
     data_folder = f"../../data/interim/orbits/orbit_{date}"
     draw_orbit(date, save_folder, data_folder)
+    # for day in range(15, 20):
+    #     print(day)
+    #     path = f"../../data/interim/orbits/orbit_20090320/20090320_{day:02d}.txt"
+    #     data = read_text_file(path)
+    #     data = [
+    #         list(map(float, s.split()))
+    #         for s in data.split("\n")[3:]
+    #         if len(s.split()) > 0
+    #     ]
+    #     y = [a[-2] for a in data]
+    #     x = [a[-1] for a in data]
+    #     plt.plot(x, y)
+    #     plt.ylim(-90, 90)
+    #     plt.xlim(-180, 180)
+    #     plt.show()
 
 
 if __name__ == "__main__":
