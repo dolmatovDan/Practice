@@ -74,9 +74,7 @@ def get_count_rate_in_day(file_name, sat, day):
 
                 res.append(
                     [
-                        cur_count_rate_25_100,
-                        cur_count_rate_100_400,
-                        cur_count_rate_400_640,
+                        sum(cur_data[2:]),
                         cur_lat,
                         cur_long,
                     ]
@@ -111,9 +109,7 @@ def main():
             )
             for data in res:
                 print(
-                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
-                        *data
-                    ),
+                    "{:06.3f}   {:06.3f}   {:06.3f}".format(*data),
                     file=plot_data_1_S1,
                 )
 
@@ -122,9 +118,7 @@ def main():
             )
             for data in res:
                 print(
-                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
-                        *data
-                    ),
+                    "{:06.3f}   {:06.3f}   {:06.3f}".format(*data),
                     file=plot_data_1_S2,
                 )
 
@@ -133,9 +127,7 @@ def main():
             )
             for data in res:
                 print(
-                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
-                        *data
-                    ),
+                    "{:06.3f}   {:06.3f}   {:06.3f}".format(*data),
                     file=plot_data_2_S1,
                 )
 
@@ -144,9 +136,7 @@ def main():
             )
             for data in res:
                 print(
-                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
-                        *data
-                    ),
+                    "{:06.3f}   {:06.3f}   {:06.3f}".format(*data),
                     file=plot_data_2_S2,
                 )
 

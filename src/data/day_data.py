@@ -3,9 +3,14 @@ from map_data_ds import TLE
 from map_data_ds import sod_to_hhmmss
 from skyfield.api import load
 import os
+from radbelt import get_flux
+from astropy import units as u
+from astropy.coordinates import EarthLocation
+from astropy.time import Time
+from skyfield.api import Topos, load
 
 sys.path.append("..")
-from utility import read_text_file, create_folder, YEAR, MONTH
+from utility import read_text_file, create_folder, YEAR, MONTH, transform_date
 
 
 def convert_hhmmss_to_date(date):
@@ -21,10 +26,10 @@ def get_day_count_rate(day, save_data, tle_file):
         for line in rate_data:
             cur_data = list(map(float, line.split()))
             cur_second = cur_data[0]
-            # cur_count_rate_25_100 = sum(cur_data[5:8])
-            # cur_count_rate_100_400 = sum(cur_data[8:11])
-            # cur_count_rate_400_640 = sum(cur_data[11:-2])
-            cur_count_rate = sum(cur_data[5:-2])
+            cur_count_rate_25_100 = sum(cur_data[5:8])
+            cur_count_rate_100_400 = sum(cur_data[8:11])
+            cur_count_rate_400_640 = sum(cur_data[11:-2])
+            # cur_count_rate = sum(cur_data[5:-2])
             if cur_second < 0:
                 continue
 
@@ -34,9 +39,11 @@ def get_day_count_rate(day, save_data, tle_file):
             cur_long, cur_lat, days_from_epoch = cur_tle.get_geo_pos(time_ts)
             ra, dec, distance = cur_tle.get_radec(time_ts)
             print(
-                "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+                "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
                     cur_second,
-                    cur_count_rate,
+                    cur_count_rate_25_100,
+                    cur_count_rate_100_400,
+                    cur_count_rate_400_640,
                     distance,
                     cur_lat,
                     cur_long,
@@ -44,8 +51,12 @@ def get_day_count_rate(day, save_data, tle_file):
                 file=data,
             )
 
-            # print("{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
-            #     cur_second, cur_count_rate, cur_lat, cur_long), file=data)
+            # print(
+            #     "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+            #         cur_second, cur_count_rate, cur_lat, cur_long
+            #     ),
+            #     file=data,
+            # )
 
 
 def split_day_count_rate(day_count_rate, date):
@@ -76,11 +87,6 @@ def split_day_count_rate(day_count_rate, date):
             else:
                 lst_orbit.append([line])
 
-    # for i in range(len(lst_orbit)):
-    #     print(len(lst_orbit[i]))
-    # print(len(lst_orbit))
-    # print(sum([len(x) for x in lst_orbit]))
-
     folder_name = f"orbit_{date}"
     folder_name = os.path.join("../../data/interim/orbits", folder_name)
     create_folder(folder_name)
@@ -100,15 +106,22 @@ def split_day_count_rate(day_count_rate, date):
             print(f"Time range duration: {cnt_min} min, {cnt_sec} sec", file=save_data)
             print(
                 "Longitude range: [ {start}  {end} ]".format(
-                    start=min(orbit[0][3], orbit[-1][3]),
-                    end=max(orbit[0][3], orbit[-1][3]),
+                    start=min(orbit[0][-1], orbit[-1][-1]),
+                    end=max(orbit[0][-1], orbit[-1][-1]),
+                ),
+                file=save_data,
+            )
+            columns = ["Time", "25-100", "100-400", "400-640", "R", "Lat", "Lon"]
+            print(
+                "{:>10}   {:>10}   {:>10}   {:>10}   {:>10}   {:>10}   {:>10}".format(
+                    *columns
                 ),
                 file=save_data,
             )
 
             for line in orbit:
                 print(
-                    "{:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}   {:06.3f}".format(
+                    "{:10.3f}   {:10.3f}   {:10.3f}   {:10.3f}   {:10.3f}   {:10.3f}   {:10.3f}".format(
                         *line
                     ),
                     file=save_data,
@@ -139,21 +152,73 @@ def get_ICRS_coordinates(day, data_file, tle_file, save_file):
             )
 
 
+def calc_flux(latitude, longitude, elevation, date, earth_radius):
+    surface_distance = (elevation - earth_radius) * u.km
+    coords = EarthLocation(
+        lon=longitude * u.deg, lat=latitude * u.deg, height=surface_distance
+    )
+    time = Time(transform_date(date))
+    energy1 = 25 * u.keV
+    res_flux = (get_flux(coords, time, energy1, "p", "max")) * 100
+    return res_flux
+
+
+def draw_belt(lat_lower_limit, lat_upper_limit, max_height, height_step, earth_radius):
+    belt_geographical_points = []
+    for lat in range(lat_lower_limit, lat_upper_limit):
+        for radius in range(0, max_height, height_step):
+            rightPart = [
+                70,
+                lat,
+                radius + earth_radius,
+                0,
+                float(
+                    str(
+                        calc_flux(
+                            lat, 70, radius + earth_radius, "20090312", earth_radius
+                        )
+                    ).split()[0]
+                ),
+            ]
+            leftPart = [
+                -70,
+                lat,
+                radius + earth_radius,
+                0,
+                float(
+                    str(
+                        calc_flux(
+                            lat, -70, radius + earth_radius, "20090312", earth_radius
+                        )
+                    ).split()[0]
+                ),
+            ]
+            belt_geographical_points.append(rightPart)
+            belt_geographical_points.append(leftPart)
+    with open("calc_data.txt", "w") as fout:
+        for x in belt_geographical_points:
+            print(*x, file=fout)
+
+
 def main():
     save_data = "../../data/interim/day_count_rate.txt"
     tle_file = "../../data/interim/actual_tle.txt"
 
-    day = 12
-    date = f"{YEAR}{MONTH:02d}{day:02d}"
-    orbit_num = 3
+    # orbit_num = 3
     # get_ICRS_coordinates(
     #     day,
     #     f"../../data/interim/orbits/orbit_{date}/{date}_{orbit_num:02d}.txt",
     #     tle_file,
     #     f"../../data/interim/orbit_{date}_{orbit_num:02d}_data.txt",
     # )
-    get_day_count_rate(day, save_data, tle_file)
-    split_day_count_rate(save_data, date)
+
+    # for day in range(1, 32):
+    #     print(day)
+    #     date = f"{YEAR}{MONTH:02d}{day:02d}"
+    #     get_day_count_rate(day, save_data, tle_file)
+    #     split_day_count_rate(save_data, date)
+
+    # draw_belt(-90, 90, 10000, 50, 6378)
 
 
 if __name__ == "__main__":

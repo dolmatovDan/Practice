@@ -23,7 +23,7 @@ def get_stable_range_boundaries(arr_x, arr_y):
 
 def get_file_stable_range_boundaries(filename):
     str_data = read_text_file(filename)
-    lst_data = [s.split() for s in str_data.split("\n") if len(s.split()) > 0][3:]
+    lst_data = [s.split() for s in str_data.split("\n") if len(s.split()) > 0][4:]
     lst_data = [list(map(float, s)) for s in lst_data]
 
     lst_count_rate_25_100 = [s[1] for s in lst_data]
